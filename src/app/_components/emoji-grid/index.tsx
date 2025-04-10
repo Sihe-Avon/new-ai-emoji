@@ -10,11 +10,7 @@ export async function EmojiGrid({ prompt }: EmojiGridProps) {
     take: 100,
     orderBy: prompt
       ? {
-          _relevance: {
-            fields: ["prompt"],
-            sort: "desc",
-            search: prompt,
-          },
+          createdAt: "desc",
         }
       : undefined,
     cacheStrategy: prompt
