@@ -90,6 +90,7 @@ async eval(script: string, keys: string[], args: string[]) {
     return null;
   }
 }
+}
 
 const redisAdapter = new RedisAdapter();
 
