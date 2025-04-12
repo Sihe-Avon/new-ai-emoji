@@ -12,6 +12,7 @@
     "prisma:push": "prisma db push"
   },
   "dependencies": {
+    "@huggingface/inference": "^2.6.4",
     "@prisma/client": "latest",
     "@types/ms": "^0.7.32",
     "@types/node": "20.6.4",
