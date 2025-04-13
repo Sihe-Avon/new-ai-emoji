@@ -1,5 +1,6 @@
 "use client"
 
+import type { FC } from "react"
 import { useState } from "react"
 import Image from "next/image"
 import toast from "react-hot-toast"
@@ -7,14 +8,14 @@ import toast from "react-hot-toast"
 interface EmojiCardProps {
   id: string
   prompt: string
-  originalUrl: string
-  noBackgroundUrl?: string
+  originalUrl: string | null
+  noBackgroundUrl?: string | null
   createdAt: Date
 }
 
-export function EmojiCard({ id, prompt, originalUrl, noBackgroundUrl, createdAt }: EmojiCardProps) {
+export const EmojiCard: FC<EmojiCardProps> = ({ id, prompt, originalUrl, noBackgroundUrl, createdAt }) => {
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedUrl, setSelectedUrl] = useState(originalUrl)
+  const [selectedUrl, setSelectedUrl] = useState(originalUrl || '')
   
   const handleImageLoad = () => {
     setIsLoading(false)
@@ -37,6 +38,10 @@ export function EmojiCard({ id, prompt, originalUrl, noBackgroundUrl, createdAt 
       console.error("Download error:", error)
       toast.error('下载失败，请重试')
     }
+  }
+
+  if (!originalUrl) {
+    return <div className="text-red-500">图片URL不可用</div>
   }
 
   return (
@@ -74,7 +79,7 @@ export function EmojiCard({ id, prompt, originalUrl, noBackgroundUrl, createdAt 
       {noBackgroundUrl && (
         <div className="mt-2 flex gap-2">
           <button 
-            onClick={() => setSelectedUrl(originalUrl)} 
+            onClick={() => setSelectedUrl(originalUrl || '')} 
             className={`text-xs px-2 py-1 rounded-md ${selectedUrl === originalUrl ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'}`}
           >
             原始

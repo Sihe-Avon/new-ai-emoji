@@ -1,10 +1,9 @@
+"use client"
+
+import { type FC } from "react"
 import { EmojiCard } from "../emoji-card"
 import { fetchEmojis } from "@/server/actions"
-import type { ReactElement } from "react"
-
-interface EmojiGridProps {
-  prompt?: string
-}
+import { Prisma } from "@prisma/client"
 
 interface Emoji {
   id: string
@@ -14,33 +13,56 @@ interface Emoji {
   createdAt: Date
 }
 
-export async function EmojiGrid({ prompt }: EmojiGridProps): Promise<ReactElement> {
+interface EmojiGridProps {
+  prompt?: string
+}
+
+interface FetchEmojisOptions {
+  take?: number
+  skip?: number
+  where?: {
+    prompt?: {
+      contains: string
+    }
+  }
+}
+
+export const EmojiGrid: FC<EmojiGridProps> = async ({ prompt }) => {
   const emojis = await fetchEmojis({
     take: 100,
-    orderBy: prompt
+    where: prompt
       ? {
-          createdAt: "desc", // 使用创建时间排序代替全文搜索排序
+          prompt: {
+            contains: prompt,
+          },
         }
       : undefined,
-  })
+  } as FetchEmojisOptions)
+
+  if (!emojis?.length) {
+    return (
+      <div className="text-center text-gray-500 py-10">
+        暂无表情包
+      </div>
+    )
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1200 ease-in-out">
-      <h2 className="font-semibold text-md text-left w-full mb-3">{!!prompt ? "Related Emojis" : "Recent Emojis"}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 justify-items-stretch w-full">
-        {emojis.map((emoji: Emoji) => {
-          const { id, prompt, originalUrl, noBackgroundUrl, createdAt } = emoji;
-          return (
-            <EmojiCard 
-              key={id}
-              id={id}
-              prompt={prompt}
-              originalUrl={originalUrl || ''}
-              noBackgroundUrl={noBackgroundUrl || undefined}
-              createdAt={createdAt}
-            />
-          );
-        })}
+      <h2 className="font-semibold text-md text-left w-full mb-3">
+        {!!prompt ? "Related Emojis" : "Recent Emojis"}
+      </h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {emojis.map((emoji: Emoji) => (
+          <EmojiCard
+            key={emoji.id}
+            id={emoji.id}
+            prompt={emoji.prompt}
+            originalUrl={emoji.originalUrl}
+            noBackgroundUrl={emoji.noBackgroundUrl}
+            createdAt={emoji.createdAt}
+          />
+        ))}
       </div>
     </div>
   )

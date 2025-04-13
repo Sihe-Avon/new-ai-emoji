@@ -8,6 +8,7 @@ import { createClient } from "redis"
 import { jwtVerify } from "jose"
 import { redirect } from "next/navigation"
 import { z } from "zod"
+import { Redis } from "@upstash/ratelimit/dist/types"
 
 const jwtSchema = z.object({
   ip: z.string(),
@@ -15,7 +16,7 @@ const jwtSchema = z.object({
 })
 
 // 创建一个简单的适配器，实现@upstash/ratelimit需要的Redis接口
-class RedisAdapter {
+class RedisAdapter implements Redis {
   private client: ReturnType<typeof createClient>;
   private connected = false;
 
@@ -96,11 +97,11 @@ const redisAdapter = new RedisAdapter();
 
 const ratelimit = {
   free: new Ratelimit({
-    redis: redisAdapter as any,
+    redis: redisAdapter,
     limiter: Ratelimit.slidingWindow(500, "1 d"),
   }),
   ios: new Ratelimit({
-    redis: redisAdapter as any,
+    redis: redisAdapter,
     limiter: Ratelimit.slidingWindow(3, "7 d"),
     prefix: "ratelimit:ios",
   }),
