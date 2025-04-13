@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { getCount } from "@/server/actions"
 
 interface CountDisplayProps {
   count?: number
@@ -10,13 +11,6 @@ function CountDisplay({ count }: CountDisplayProps) {
       {count || "–––"} emojis generated and counting!
     </p>
   )
-}
-
-// 将获取数据的逻辑移到服务端组件
-async function getCount() {
-  'use server'
-  const { prisma } = await import("@/server/db")
-  return prisma.emoji.count()
 }
 
 async function AsyncEmojiCount() {
