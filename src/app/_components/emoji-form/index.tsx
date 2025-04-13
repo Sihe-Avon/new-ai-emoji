@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 import { createEmoji } from "./action"
 import { SubmitButton } from "./submit-button"
-// @ts-expect-error
-import { experimental_useFormState as useFormState } from "react-dom"
+// @ts-ignore
+import { useFormState } from "react-dom"
 import toast from "react-hot-toast"
 import useSWR from "swr"
 
@@ -51,7 +51,7 @@ export function EmojiForm({ initialPrompt }: EmojiFormProps) {
       }
     },
     {
-      onSuccess: (token) => setToken(token),
+      onSuccess: (token: string) => setToken(token),
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       errorRetryCount: 3,

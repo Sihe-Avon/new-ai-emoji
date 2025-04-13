@@ -4,15 +4,16 @@ import { nanoid } from "@/lib/utils"
 import { prisma } from "@/server/db"
 import { replicate } from "@/server/replicate"
 import { Ratelimit } from "@upstash/ratelimit"
-import { createClient } from "redis"
+import { createClient } from "@upstash/ratelimit"
 import { jwtVerify } from "jose"
 import { redirect } from "next/navigation"
 import { z } from "zod"
-import { Redis } from "@upstash/ratelimit/dist/types"
+import { Redis } from "@upstash/ratelimit"
 
 const jwtSchema = z.object({
   ip: z.string(),
-  isIOS: z.boolean(),
+  exp: z.number(),
+  iat: z.number(),
 })
 
 // 创建一个简单的适配器，实现@upstash/ratelimit需要的Redis接口
@@ -120,9 +121,9 @@ export async function createEmoji(prevFormState: FormState | undefined, formData
 
   try {
     const verified = await jwtVerify(token ?? "", new TextEncoder().encode(process.env.API_SECRET ?? ""))
-    const { ip, isIOS } = jwtSchema.parse(verified.payload)
+    const { ip, exp, iat } = jwtSchema.parse(verified.payload)
 
-    const { remaining } = await (isIOS ? ratelimit.ios.limit(ip) : ratelimit.free.limit(ip))
+    const { remaining } = await (exp > iat ? ratelimit.ios.limit(ip) : ratelimit.free.limit(ip))
     if (remaining <= 0) return { message: "Free limit reached, download mobile app for unlimited access." }
 
     const safetyRating = await replicate.classifyPrompt({ prompt })
